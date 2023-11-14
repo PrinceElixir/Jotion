@@ -16,7 +16,7 @@ const DocumentsPage = () => {
   const create = useMutation(api.documents.create);
 
   const onCreate = () => {
-    const promise = create({ title: "Untitled" })
+    const promise = create({ title: `Hi, I am Jotion. What can I do for you ${user?.firstName}` })
       .then((documentId) => router.push(`/documents/${documentId}`))
 
     toast.promise(promise, {
@@ -47,7 +47,8 @@ const DocumentsPage = () => {
       </h2>
       <Button onClick={onCreate}>
         <PlusCircle className="h-4 w-4 mr-2" />
-        Create a note
+        <h1 className="text-black ">Hi, I am Jotion, create your note {user?.firstName}</h1>
+       
       </Button>
     </div>
    );

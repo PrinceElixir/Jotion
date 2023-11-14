@@ -3,15 +3,70 @@
 import { useTheme } from "next-themes";
 import {
   BlockNoteEditor,
-  PartialBlock
+  PartialBlock,
+  Block
 } from "@blocknote/core";
 import {
   BlockNoteView,
-  useBlockNote
+  useBlockNote,
+  ReactSlashMenuItem,
+  getDefaultReactSlashMenuItems
 } from "@blocknote/react";
 import "@blocknote/core/style.css";
 
 import { useEdgeStore } from "@/lib/edgestore";
+import { HiOutlineGlobeAlt } from "react-icons/hi";
+
+const cycleBlocksShortcut = (event: KeyboardEvent, editor: BlockNoteEditor) => {
+  // Checks for Ctrl+G shortcut
+  if (event.ctrlKey && event.key === "g") {
+    // Needs type cast as Object.keys doesn't preserve type
+    const allBlockTypes: Block["type"][] = Object.keys(
+      editor.schema
+    ) as Block["type"][];
+
+    const currentBlockType: Block["type"] =
+      editor.getTextCursorPosition().block.type;
+
+    const nextBlockType: Block["type"] =
+      allBlockTypes[
+        (allBlockTypes.indexOf(currentBlockType) + 1) % allBlockTypes.length
+      ];
+
+    editor.updateBlock(editor.getTextCursorPosition().block, {
+      type: nextBlockType,
+    });
+  }
+};
+
+
+const insertHelloWorld = (editor: BlockNoteEditor) => {
+  
+  const currentBlock: Block = editor.getTextCursorPosition().block;
+ 
+  const codeBlock: PartialBlock = {
+    type: "paragraph",
+    content: [{ type: "text", text: "Write your code ", styles:{backgroundColor: "0F0F0F" } }],
+  };
+
+   
+  editor.insertBlocks([codeBlock], currentBlock, "after");
+};
+
+const insertHelloWorldItem: ReactSlashMenuItem = {
+  name: "Insert a code block",
+  execute: insertHelloWorld,
+  aliases: ["helloworld", "hw"],
+  group: "Other",
+  icon: <HiOutlineGlobeAlt size={18} />,
+  hint: "Used to insert a your code block",
+   
+};
+
+const customSlashMenuItemList = [
+  ...getDefaultReactSlashMenuItems(),
+  insertHelloWorldItem,
+];
 
 interface EditorProps {
   onChange: (value: string) => void;
@@ -36,6 +91,7 @@ const Editor = ({
   }
 
   const editor: BlockNoteEditor = useBlockNote({
+    slashMenuItems: customSlashMenuItemList,
     editable,
     initialContent: 
       initialContent 
